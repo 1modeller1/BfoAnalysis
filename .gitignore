@@ -1,0 +1,9 @@
+.git
+.idea
+.venv
+__pycache__
+check*
+try*
+data/*
+graphs/*
+copy/*

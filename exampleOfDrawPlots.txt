@@ -1,0 +1,35 @@
+05              # okved
+config:
+O = orgInfo     # organisation info
+B = balance
+C = capChange   # capital change
+F = finRes      # financial result
+FM = fundsMove  # funds movement
+T = targFunds   # target funds using
+BS = bfoStart
+BSP = bfoStartPlus
+
+c = current
+p = previous
+t = total
+
+# parms
+# DIS -> distinct (from SQL)
+# LOGx or LOGy -> logarithm of x or y axis
+
+# sortBy
+# ASC or DESC (from SQL)
+---
+name: Plot
+period: 2024
+nameX: x
+nameY: y
+xlim: -10 10.5
+ylim: -10.5 10
+parms: DIS
+sortBy: B.c1310 ASC
+legend: may, gav
+y: B.c1310 / B.c1600, B.c1300 / B.c1600
+x:
+---
+y: F.c2100 / B.c1100
