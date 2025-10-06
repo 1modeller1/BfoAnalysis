@@ -60,6 +60,8 @@ def do (okved : str, year = "", buffer = 200):
         db.commit()
 
         for go in range(buffer):
+            if t * buffer + go == length:
+                break
             com11 = "INSERT INTO bfoStart VALUES ("
             for i in columnsT1:
                 inp = str(js["content"][go][i])
@@ -67,6 +69,7 @@ def do (okved : str, year = "", buffer = 200):
                     com11 += "NULL,"
                     continue
                 b = re.sub(r'"', r'', inp)
+                b = re.sub(r"'", r'', inp)
                 com11 += "'" + b + "',"
             com11 = com11[:-1] + ")"
             cur.execute(com11)

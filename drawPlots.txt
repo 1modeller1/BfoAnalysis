@@ -1,4 +1,4 @@
-05              # okved
+24            # okved
 config:
 O = orgInfo     # organisation info
 B = balance
@@ -20,16 +20,12 @@ t = total
 # sortBy
 # ASC or DESC (from SQL)
 ---
-name: Plot
+name: Коэффициент текущей ликвидности
+parms: LOGy
 period: 2024
-nameX: x
-nameY: y
-xlim: -10 10.5
-ylim: -10.5 10
-parms: DIS
-sortBy: B.c1310 ASC
-legend: may, gav
-y: B.c1310 / B.c1600, B.c1300 / B.c1600
-x:
+y: B.c1200 / B.c1500
 ---
-y: F.c2100 / B.c1100
+name: Коэффициент абсолютной ликвидности
+parms: LOGy
+period: 2024
+y: (B.c1250 + B.c1240) / B.c1500

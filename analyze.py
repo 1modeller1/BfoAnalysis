@@ -2,8 +2,8 @@ import re
 import sqlite3
 import matplotlib.pyplot as plt
 
+NUM = 0
 def do (fileName = "drawPlots.txt"):
-    NUM = 0
     def renderBlock (text):
         global NUM
         def replacer (match):
@@ -23,9 +23,10 @@ def do (fileName = "drawPlots.txt"):
             if match := re.search(rf"^{axis}: (.*)$", tex, flags=re.MULTILINE):
                 run = match.group(1)
                 tables = list(set(re.findall(r"([^ ]*)\.", run)))
+                tables = list(set( [re.sub(r"(\(|\))", "", tab) for tab in tables] ))
                 raws = list(set(re.findall(r"([^ ]*\.[^ ,\n]*)", run)))
 
-                com = f"SELECT {run} FROM {tables[0]}\n"
+                com = f"SELECT{ " DISTINCT" if "parms" in settings and "DIS" in settings["parms"] else ""} {run} FROM {tables[0]}\n"
                 for tab in tables[1:]:
                     com += f"JOIN {tab}\nON {tables[0]}.inn = {tab}.inn\n"
                 if "period" in settings:
@@ -101,18 +102,18 @@ def do (fileName = "drawPlots.txt"):
         if "legend" in settings:
             lg = re.findall(r"(?:,|^)(.*?)(?=,|$)", settings["legend"])
             for i, do in enumerate(zip(xx, yy)):
-                plt.plot(do[0], do[1], label=lg[i])
+                plt.plot(do[0], do[1], "o", ms=2, label=lg[i])
             plt.legend(fontsize = 12)
         else:
             for do in zip(xx, yy):
-                plt.plot(do[0], do[1])
+                plt.plot(do[0], do[1], "o", ms=2)
 
         plt.savefig(f"graphs/plot-{NUM}.png", dpi=200)
         plt.close()
         NUM += 1
 
     file = open(fileName, "r")
-    okved = re.findall(r"^\d+", file.readline())[0]
+    okved = re.findall(r"^[\d.]+", file.readline())[0]
     db = sqlite3.connect(f"data/data-okved-{okved}.db")
     cur = db.cursor()
 

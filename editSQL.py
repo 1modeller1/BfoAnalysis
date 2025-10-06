@@ -11,4 +11,4 @@ for a in tables:
     cur.execute(comDrop)
     db.commit()
 
-shutil.copy2(f"data/data-okved-{okved}.db", f"copy/data-okved-{okved}.db")
+# shutil.copy2(f"data/data-okved-{okved}.db", f"copy/data-okved-{okved}.db")

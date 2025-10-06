@@ -29,7 +29,7 @@ def do (okved):
         a_ = list(inpJson.keys())
         cursor.execute(f"PRAGMA table_info ({tableName});")
         b_ = [a[1] for a in cursor]
-        ab_ = list(set(a_) ^ (set(inpJson) & set(b_)))
+        ab_ = list(set(a_) ^ (set(a_) & set(b_)))
 
         for i in ab_:
             cursor.execute(f"""
