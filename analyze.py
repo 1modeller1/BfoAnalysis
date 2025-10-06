@@ -1,6 +1,8 @@
-import re
+import re, os
 import sqlite3
 import matplotlib.pyplot as plt
+import numpy as np
+from scipy import stats
 
 NUM = 0
 def do (fileName = "drawPlots.txt"):
@@ -25,12 +27,18 @@ def do (fileName = "drawPlots.txt"):
                 tables = list(set(re.findall(r"([^ ]*)\.", run)))
                 tables = list(set( [re.sub(r"(\(|\))", "", tab) for tab in tables] ))
                 raws = list(set(re.findall(r"([^ ]*\.[^ ,\n]*)", run)))
+                runN = ",".join([ "ROUND(" + a + ",2)" for a in re.findall(r"(?:,|^)(.*?)(?=,|$)", run)])
 
-                com = f"SELECT{ " DISTINCT" if "parms" in settings and "DIS" in settings["parms"] else ""} {run} FROM {tables[0]}\n"
+                com = f"SELECT{ " DISTINCT" if "parms" in settings and "DIS" in settings["parms"] else ""} "
+                com += f"{runN} FROM {tables[0]}\n"
                 for tab in tables[1:]:
                     com += f"JOIN {tab}\nON {tables[0]}.inn = {tab}.inn\n"
                 if "period" in settings:
-                    com += f"WHERE {" and ".join(tab + f".period = {settings["period"]}" for tab in tables)}\n"
+                    com += f"WHERE {" and ".join(tab + f".period = {settings["period"]}" for tab in tables)}"
+                    if "parms" in settings and "NON" in settings["parms"]:
+                        if "WHERE" in com: com += " and "
+                        com +=" and ".join([a + " IS NOT NULL" for a in re.findall(r"(?:,|^)(.*?)(?=,|$)", run)])
+                    com += "\n"
                 if "sortBy" in settings:
                     com += f"ORDER BY {settings["sortBy"]}"
 
@@ -71,9 +79,10 @@ def do (fileName = "drawPlots.txt"):
         yy = getData("y")
         xx = getData("x")
         if yy == None:
-            yy.append([a for a in range(xx[0])])
+            yy = [[a for a in range(len(xx[0]))]]
         elif xx == None:
             xx = [[a for a in range(len(yy[0]))]]
+
         while len(yy) < len(xx):
             yy.append(yy[-1])
         while len(xx) < len(yy):
@@ -98,6 +107,10 @@ def do (fileName = "drawPlots.txt"):
             plt.xscale("log")
         if "parms" in settings and "LOGy" in settings["parms"]:
             plt.yscale("log")
+        if "parms" in settings and "symLOGy" in settings["parms"]:
+            plt.yscale("symlog")
+        if "parms" in settings and "symLOGx" in settings["parms"]:
+            plt.xscale("symlog")
 
         if "legend" in settings:
             lg = re.findall(r"(?:,|^)(.*?)(?=,|$)", settings["legend"])
@@ -110,6 +123,33 @@ def do (fileName = "drawPlots.txt"):
 
         plt.savefig(f"graphs/plot-{NUM}.png", dpi=200)
         plt.close()
+
+        if "STAT" in settings["parms"]:
+            if not "stat" in os.listdir(): os.mkdir("stat")
+            if NUM == 0: file = open(f"stat/stat-{okved}.txt", "w")
+            else: file = open(f"stat/stat-{okved}.txt", "a")
+
+            for i, ys in enumerate(yy):
+                ys = list(filter(lambda x: x != None, ys))
+                stat = {}
+                stat["mean"] = np.mean(ys) # мат ожидание
+                stat["variance"] = np.var(ys, ddof=1) # дисперсия
+                stat["std_dev"] = np.std(ys, ddof=1) # стандартное отклонение
+                stat["skewness"] = stats.skew(ys) # ассиметрия
+                stat["kurtosis"] = stats.kurtosis(ys) # эксцесс
+                stat["median"] = np.median(ys) # медиана
+                q1, q3 = np.percentile(ys, 25), np.percentile(ys, 75)
+                stat["iqr"] = q3 - q1 # межквартальный размах
+
+                names = {"mean" : "Мат ожидание", "variance" : "Дисперсия", "std_dev" : "Средне квадратическое отклонение",
+                         "skewness" : "Асимметрия", "kurtosis" : "Эксцесс", "median" : "Медиана", "iqr" : "Межквартальный размах"}
+                text = f"Plot-{NUM} {settings["name"] if "name" in settings else ""} ({lg[i] if "legend" else "" in settings})\n"
+                text += "\n".join(names[a] + ": " + f"{round(stat[a], 2):,}" for a in stat.keys())
+                text += "\n\n"
+                file.write(text)
+            file.close()
+
+        print(NUM, end=" / ")
         NUM += 1
 
     file = open(fileName, "r")

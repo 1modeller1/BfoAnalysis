@@ -1,5 +1,5 @@
 import json
-import sys, shutil
+import sys, shutil, os
 import requests
 import re
 import sqlite3
@@ -7,7 +7,7 @@ import sqlite3
 # У меня скорость скачивания 40 сек на 100 позиций
 
 def do (okved):
-
+    if not "copy" in os.listdir(): os.mkdir("copy")
     shutil.copy2(f"data/data-okved-{okved}.db", f"copy/data-okved-{okved}.db")
 
     def getIds ():
@@ -49,6 +49,7 @@ def do (okved):
     ids = getIds()
     length = len(ids)
 
+    if not "data" in os.listdir(): os.mkdir("data")
     db = sqlite3.connect(f"data/data-okved-{okved}.db")
     cur = db.cursor()
 

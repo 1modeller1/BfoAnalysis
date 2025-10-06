@@ -1,4 +1,4 @@
-05              # okved
+24            # okved
 config:
 O = orgInfo     # organisation info
 B = balance
@@ -16,9 +16,11 @@ t = total
 # parms
 # DIS -> distinct (from SQL)
 # LOGx or LOGy -> logarithm of x or y axis
+# symLOGx or sumLOGy -> logarithm of x or y axis (with under zero numbers)
+# STAT -> show math statistic for range
+# NON -> don't show results with None (No None)
 
-# sortBy
-# ASC or DESC (from SQL)
+# sortBy: <RAW> ASC or DESC (from SQL)
 ---
 name: Plot
 period: 2024
@@ -26,7 +28,7 @@ nameX: x
 nameY: y
 xlim: -10 10.5
 ylim: -10.5 10
-parms: DIS
+parms: DIS LOGy STAT NON
 sortBy: B.c1310 ASC
 legend: may, gav
 y: B.c1310 / B.c1600, B.c1300 / B.c1600

@@ -3,8 +3,8 @@ import os, re
 import addCompanies, addData, analyze
 
 if __name__ == "__main__":
-    inp = input("Import companies inns, data or draw plots? (inn/data/plot): ")
-    # inp = "plot"
+    # inp = input("Import companies inns, data or draw plots? (inn/data/plot): ")
+    inp = "plot"
     if inp == "inn":
         inp2 = input("okved (year): ")
         il = re.findall(r" ?([^ ]+) ?", inp2)

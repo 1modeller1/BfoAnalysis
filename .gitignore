@@ -7,4 +7,5 @@ try*
 data/*
 graphs/*
 copy/*
+stat/*
 log

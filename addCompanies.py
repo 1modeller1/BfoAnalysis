@@ -1,5 +1,5 @@
 import json
-import sys
+import sys, os
 import requests
 import re
 import sqlite3
@@ -32,6 +32,9 @@ def do (okved : str, year = "", buffer = 200):
                     length = asked
                     break
 
+    if not "data" in os.listdir(): os.mkdir("data")
+    db = sqlite3.connect(f"data/data-okved-{okved}.db")
+    cur = db.cursor()
     t = 0
     while t * buffer < length:
         url = f"https://bo.nalog.gov.ru/advanced-search/organizations?allFieldsMatch=false&okved={okved}&page={str(t)}&size={str(buffer)}"
@@ -41,9 +44,6 @@ def do (okved : str, year = "", buffer = 200):
 
         # file = open("data/file.json", "w")
         # json.dump(js, file, indent=4, ensure_ascii=False)
-
-        db = sqlite3.connect(f"data/data-okved-{okved}.db")
-        cur = db.cursor()
 
         columnsT1 = ["id", "inn", "shortName", "ogrn", "indexx", "region", "district",
                      "city", "settlement", "street", "house", "building", "office", "okved2",
