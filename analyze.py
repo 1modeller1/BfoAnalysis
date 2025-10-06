@@ -121,6 +121,7 @@ def do (fileName = "drawPlots.txt"):
             for do in zip(xx, yy):
                 plt.plot(do[0], do[1], "o", ms=2)
 
+        if not "graphs" in os.listdir(): os.mkdir("graphs")
         plt.savefig(f"graphs/plot-{NUM}.png", dpi=200)
         plt.close()
 

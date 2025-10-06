@@ -44,7 +44,7 @@ legend: Kбл,Задолженность
 y: (B.c1230 + B.c1240 + B.c1250) / (B.c1510 + B.c1520 + B.c1550), B.c1520
 ---
 name: Коэффициент автономии
-parms: LOGy
+parms: symLOGy
 period: 2024
 sortBy: B.c1300 / B.c1600
 y: B.c1300 / B.c1600
