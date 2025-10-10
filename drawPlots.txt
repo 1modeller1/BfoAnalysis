@@ -97,3 +97,4 @@ sortBy: F.c2200
 y: F.c2200
 mapR: F.c2200
 mapW: F.c2200
+pointSize: 2 * x + 1.5

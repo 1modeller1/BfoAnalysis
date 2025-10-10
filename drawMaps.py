@@ -46,14 +46,17 @@ def drawWorldMap (okved, input, num, settings):
     cursor.execute(com)
     values, lats, lons = [list(d) for d in zip(*cursor)]
 
-    values = [log10(a) if a > 0 else 0.3 for a in values]
+    values = [log10(a) if a > 0 else 0 for a in values]
     maxD, minD = max(values), min(values)
     cValues = [round((v - minD) / (maxD - minD), 2) for v in values]
 
     colors = []
     for c in cValues:
         colors.append([round(1 - c, 2), c, 0])
-    cValues = [c * 10 for c in cValues]
+    if "pointSize" in settings:
+        cValues = [eval(settings["pointSize"].replace("x", str(c))) for c in cValues]
+    else:
+        cValues = [c * 2 + 1.5 for c in cValues]
 
     plt.figure(figsize=(12,8))
     ax = plt.axes(projection=ccrs.LambertConformal(central_longitude=105, central_latitude=60))
@@ -113,14 +116,17 @@ def drawRegionMap (okved, input, num, settings):
     cursor.execute(com)
     values, lats, lons = [list(d) for d in zip(*cursor)]
 
-    values = [log10(a) if a > 0 else 0.2 for a in values]
+    values = [log10(a) if a > 0 else 0 for a in values]
     maxD, minD = max(values), min(values)
     cValues = [round((v - minD) / (maxD - minD), 2) for v in values]
 
     colors = []
     for c in cValues:
         colors.append([round(1 - c, 2), c, 0])
-    cValues = [c * 10 for c in cValues]
+    if "pointSize" in settings:
+        cValues = [eval(settings["pointSize"].replace("x", str(c))) for c in cValues]
+    else:
+        cValues = [c * 2 + 1.5 for c in cValues]
 
     regions = gpd.read_file("regionsShape/gadm41_RUS_1.shp")
     regions["geometry"] = regions["geometry"].simplify(tolerance=0.1, preserve_topology=True)
@@ -177,7 +183,7 @@ def simplePrepair (text):
 
     if re.search(rf"^mapW: (.*)$", tex, flags=re.MULTILINE):
         drawWorldMap(okved, tex, NUM, settings)
-    elif re.search(rf"^mapR: (.*)$", tex, flags=re.MULTILINE):
+    if re.search(rf"^mapR: (.*)$", tex, flags=re.MULTILINE):
         drawRegionMap(okved, tex, NUM, settings)
     print(NUM, end=" / ", flush=True)
 

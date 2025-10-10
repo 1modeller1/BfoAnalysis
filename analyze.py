@@ -70,7 +70,7 @@ def do (fileName = "drawPlots.txt"):
 
         if re.search(rf"^mapW: (.*)$", tex, flags=re.MULTILINE):
             drawWorldMap(okved, tex, NUM, settings)
-        elif re.search(rf"^mapR: (.*)$", tex, flags=re.MULTILINE):
+        if re.search(rf"^mapR: (.*)$", tex, flags=re.MULTILINE):
             drawRegionMap(okved, tex, NUM, settings)
 
         yy = getData("y")
