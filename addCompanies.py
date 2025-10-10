@@ -4,9 +4,6 @@ import requests
 import re
 import sqlite3
 
-# okved = "05"
-# buffer : int = 200
-
 def do (okved : str, year = "", buffer = 200):
 
     # Check number of companies to download and ask about it
@@ -91,3 +88,14 @@ def do (okved : str, year = "", buffer = 200):
 
             print((str(round((t * buffer + go + 1) / length*100, 1)) + " %").ljust(12) + "(" + str(t * buffer + go + 1) + ")" )
         t += 1
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    if args:
+        il = [args[0], args[1] if len(args) > 1 else ""]
+    else:
+        inp = input("okved (year): ")
+        il = re.findall(r" ?([^ ]+) ?", inp)
+        if len(il) == 1:
+            il.append("")
+    do(il[0], il[1])

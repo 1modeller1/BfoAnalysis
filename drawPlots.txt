@@ -1,4 +1,4 @@
-24            # okved
+10.1            # okved
 config:
 O = orgInfo     # organisation info
 B = balance
@@ -28,6 +28,7 @@ period: 2024
 sortBy: B.c1520
 legend: Kтл,Задолженность
 y: B.c1200 / B.c1500, B.c1520
+equation: >= 1.5
 ---
 name: Коэффициент абсолютной ликвидности
 parms: LOGy
@@ -35,6 +36,7 @@ period: 2024
 sortBy: B.c1520
 legend: K абс ликв,К дневн ликв,Задолженность
 y: (B.c1250 + B.c1240) / B.c1500, (B.c1400 + B.c1500 + B.p1400 + B.p1500) / 366 * (1 / 2 + (B.c1400 + B.c1500) / F.c2120), B.c1520
+equation: >= 0.2
 ---
 name: Коэффициент быстрой ликвидности
 parms: LOGy
@@ -42,33 +44,56 @@ period: 2024
 sortBy: B.c1520
 legend: Kбл,Задолженность
 y: (B.c1230 + B.c1240 + B.c1250) / (B.c1510 + B.c1520 + B.c1550), B.c1520
+equation: >= 0.8
 ---
 name: Коэффициент автономии
 parms: symLOGy
 period: 2024
 sortBy: B.c1300 / B.c1600
 y: B.c1300 / B.c1600
+equation: >= 0.5
 ---
 name: Коэффициент финансовой зависимости
 parms: LOGy
 period: 2024
 sortBy: B.c1600 / (B.c1400 + B.c1500)
 y: B.c1600 / (B.c1400 + B.c1500)
+equation: <= 2
 ---
 name: Коэффициент структуры долгосрочных заемных вложений
 parms: symLOGy
 period: 2024
 sortBy: B.c1400 / B.c1100
 y: B.c1400 / B.c1100
+equation: <= 1
 ---
 name: Коэффициент финансового рычага
 parms: symLOGy
 period: 2024
 sortBy: (B.c1400 + B.c1500) / B.c1300
 y: (B.c1400 + B.c1500) / B.c1300
+equation: <= 1
 ---
 name: Коэффициент обеспеченности собственными оборотными активами
-parms: symLOGy NON
+parms: symLOGy STAT
 period: 2024
 sortBy: (B.c1200 - B.c1500) / B.c1500
 y: (B.c1200 - B.c1500) / B.c1500
+where:
+equation: >= 0.3
+eColor: red
+---
+name: К долгосрочного привлечения заемных средств
+parms: symLOGy STAT
+period: 2024
+sortBy: B.c1400 / (B.c1400 + B.c1300)
+y: B.c1400 / (B.c1400 + B.c1300)
+equation: <= 0.5
+---
+name: Прибыль от продаж
+parms: symLOGy STAT
+period: 2024
+sortBy: F.c2200
+y: F.c2200
+mapR: F.c2200
+mapW: F.c2200

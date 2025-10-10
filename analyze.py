@@ -1,8 +1,11 @@
 import re, os
 import sqlite3
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
+from drawMaps import drawWorldMap, drawRegionMap
 
 NUM = 0
 def do (fileName = "drawPlots.txt"):
@@ -17,10 +20,6 @@ def do (fileName = "drawPlots.txt"):
                 after = re.sub(rf"\.{k}", rf".{config[k]}", after)
             return before + ":" + after
 
-        # def replacer_2 (match):
-        #     value = str( go[int(match.group(0))] )
-        #     return value if value != "None" else "0"
-
         def getData (axis):
             if match := re.search(rf"^{axis}: (.*)$", tex, flags=re.MULTILINE):
                 run = match.group(1)
@@ -34,32 +33,24 @@ def do (fileName = "drawPlots.txt"):
                 for tab in tables[1:]:
                     com += f"JOIN {tab}\nON {tables[0]}.inn = {tab}.inn\n"
                 if "period" in settings:
-                    com += f"WHERE {" and ".join(tab + f".period = {settings["period"]}" for tab in tables)}"
+                    com += f"WHERE {" and ".join(tab + f".period = {settings["period"]}" for tab in tables if not tab in ["bfoStart", "bfoStartPlus"])}"
                     if "parms" in settings and "NON" in settings["parms"]:
                         if "WHERE" in com: com += " and "
+                        else: com += "WHERE "
                         com +=" and ".join([a + " IS NOT NULL" for a in re.findall(r"(?:,|^)(.*?)(?=,|$)", run)])
-                    com += "\n"
+                if "where" in settings:
+                    if "WHERE" in com: com += " and "
+                    else: com += "WHERE "
+                    com += settings["where"]
+                com += "\n"
                 if "sortBy" in settings:
                     com += f"ORDER BY {settings["sortBy"]}"
 
                 cur.execute(com)
                 ans = [list(d) for d in zip(*cur)]
-                # plt.plot()
-                # plt.show()
-
-                # ma = re.findall(r"(?:,|^)(.*?)(?=,|$)", run)
-                # m = ["" for _ in ma]
-                # for i, a in enumerate(ma):
-                #     m[i] = a
-                #     for b in raws:
-                #         m[i] = m[i].replace(b, str(raws.index(b)))
-                #
-                # ys = [[] for _ in ma]
-                # for go in ans:
-                #     for mm in m:
-                #         result = re.sub(r"\b\d+\b", replacer_2, mm)
-                #         ys[i].append(eval(result))
                 return ans
+            else:
+                return None
 
         if m := re.findall(r"^parms(.*)", text, flags=re.MULTILINE):
             m = m[0]
@@ -68,17 +59,25 @@ def do (fileName = "drawPlots.txt"):
             tex = text
 
         for k in config.keys():
-            tex = re.sub(r"(.*):(.*)", replacer, tex)
+            tex = re.sub(r"(.+):(.+)", replacer, tex)
         tex = tex.replace("PARMS", f"parms{m}")
 
         settings = {}
         for line in tex.splitlines():
-            if gr := re.findall(r"(.*): ?(.*)", line)[0]:
+            if gr := re.findall(r"(.+): ?(.+)", line):
+                gr = gr[0]
                 settings[gr[0]] = gr[1]
+
+        if re.search(rf"^mapW: (.*)$", tex, flags=re.MULTILINE):
+            drawWorldMap(okved, tex, NUM, settings)
+        elif re.search(rf"^mapR: (.*)$", tex, flags=re.MULTILINE):
+            drawRegionMap(okved, tex, NUM, settings)
 
         yy = getData("y")
         xx = getData("x")
-        if yy == None:
+        if yy == None and xx == None:
+            return None
+        elif yy == None:
             yy = [[a for a in range(len(xx[0]))]]
         elif xx == None:
             xx = [[a for a in range(len(yy[0]))]]
@@ -87,6 +86,9 @@ def do (fileName = "drawPlots.txt"):
             yy.append(yy[-1])
         while len(xx) < len(yy):
             xx.append(xx[-1])
+        if "equation" in settings:
+            tmp = re.findall(r"(?:<|>|=)*(.*)", settings["equation"])[0]
+            eq = [eval(tmp.replace("x", str(x))) for x in xx[0]]
 
         if "name" in settings:
             plt.title(settings["name"])
@@ -120,12 +122,27 @@ def do (fileName = "drawPlots.txt"):
         else:
             for do in zip(xx, yy):
                 plt.plot(do[0], do[1], "o", ms=2)
+        if "equation" in settings:
+            ymin, ymax = plt.ylim()
+            if "eColor" in settings:
+                eColor = settings["eColor"]
+            else:
+                eColor = "red"
+
+            if not "ylim" in settings:
+                plt.ylim(ymin, ymax)
+            if ">" in settings["equation"]:
+                plt.fill_between(xx[0], eq, ymin, color=eColor, alpha=0.25)
+            elif "<" in settings["equation"]:
+                plt.fill_between(xx[0], eq, ymax, color=eColor, alpha=0.25)
+            if "=" in settings["equation"]:
+                plt.plot(xx[0], eq, color =eColor, alpha=0.5)
 
         if not "graphs" in os.listdir(): os.mkdir("graphs")
         plt.savefig(f"graphs/plot-{NUM}.png", dpi=200)
         plt.close()
 
-        if "STAT" in settings["parms"]:
+        if "parms" in settings and "STAT" in settings["parms"]:
             if not "stat" in os.listdir(): os.mkdir("stat")
             if NUM == 0: file = open(f"stat/stat-{okved}.txt", "w")
             else: file = open(f"stat/stat-{okved}.txt", "a")
@@ -144,13 +161,13 @@ def do (fileName = "drawPlots.txt"):
 
                 names = {"mean" : "Мат ожидание", "variance" : "Дисперсия", "std_dev" : "Средне квадратическое отклонение",
                          "skewness" : "Асимметрия", "kurtosis" : "Эксцесс", "median" : "Медиана", "iqr" : "Межквартальный размах"}
-                text = f"Plot-{NUM} {settings["name"] if "name" in settings else ""} ({lg[i] if "legend" else "" in settings})\n"
+                text = f"Plot-{NUM} {settings["name"] if "name" in settings else ""} ({lg[i] if "legend" in settings else "--"})\n"
                 text += "\n".join(names[a] + ": " + f"{round(stat[a], 2):,}" for a in stat.keys())
                 text += "\n\n"
                 file.write(text)
             file.close()
 
-        print(NUM, end=" / ")
+        print(NUM, end=" / ", flush=True)
         NUM += 1
 
     file = open(fileName, "r")
@@ -177,3 +194,10 @@ def do (fileName = "drawPlots.txt"):
             block += line
     if block != "":
         renderBlock(block)
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    if args:
+        do(args[0])
+    else:
+        do()

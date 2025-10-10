@@ -57,11 +57,11 @@ def do (okved):
     comO = "CREATE TABLE IF NOT EXISTS orgInfo (id TEXT," # organisation info
     comO += ",".join(a + " TEXT" for a in columnsO) + ")"
     columnsMain = ["id", "inn", "period", "type", "okud"]
-    comB = f"CREATE TABLE IF NOT EXISTS balance ({",".join(columnsMain)})"
-    comF = f"CREATE TABLE IF NOT EXISTS finRes ({",".join(columnsMain)})" # financial result
-    comC = f"CREATE TABLE IF NOT EXISTS capChange ({",".join(columnsMain)})" # capital change
-    comM = f"CREATE TABLE IF NOT EXISTS fundsMove ({",".join(columnsMain)})" # funds movement
-    comT = f"CREATE TABLE IF NOT EXISTS targFund ({",".join(columnsMain)})" # target funds using
+    comB = f"CREATE TABLE IF NOT EXISTS balance ({",".join( a + " TEXT" for a in columnsMain)})"
+    comF = f"CREATE TABLE IF NOT EXISTS finRes ({",".join( a + " TEXT" for a in columnsMain)})" # financial result
+    comC = f"CREATE TABLE IF NOT EXISTS capChange ({",".join( a + " TEXT" for a in columnsMain)})" # capital change
+    comM = f"CREATE TABLE IF NOT EXISTS fundsMove ({",".join( a + " TEXT" for a in columnsMain)})" # funds movement
+    comT = f"CREATE TABLE IF NOT EXISTS targFund ({",".join( a + " TEXT" for a in columnsMain)})" # target funds using
 
     for a in [comB, comO, comF, comC, comM, comT]:
         cur.execute(a)
@@ -105,3 +105,11 @@ def do (okved):
             print("ERROR")
             ERRORS.append(id)
     print(ERRORS)
+
+if __name__ == "__main__":
+    args = sys.argv[1:]
+    if args:
+        inp = args[0]
+    else:
+        inp = input("okved: ")
+    do(inp)
