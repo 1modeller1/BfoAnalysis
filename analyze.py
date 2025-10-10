@@ -9,7 +9,7 @@ from drawMaps import drawWorldMap, drawRegionMap
 
 NUM = 0
 def do (fileName = "drawPlots.txt"):
-    def renderBlock (text):
+    def renderBlock (text, setDefault):
         global NUM
         def replacer (match):
             before = match.group(1)
@@ -62,7 +62,7 @@ def do (fileName = "drawPlots.txt"):
             tex = re.sub(r"(.+):(.+)", replacer, tex)
         tex = tex.replace("PARMS", f"parms{m}")
 
-        settings = {}
+        settings = setDefault
         for line in tex.splitlines():
             if gr := re.findall(r"(.+): ?(.+)", line):
                 gr = gr[0]
@@ -176,6 +176,7 @@ def do (fileName = "drawPlots.txt"):
     cur = db.cursor()
 
     config = {}
+    settings = {}
     conf = False
     block = ""
     for line in file.readlines():
@@ -184,16 +185,18 @@ def do (fileName = "drawPlots.txt"):
         elif "---" in line:
             conf = False
             if block != "":
-                renderBlock(block)
+                renderBlock(block, settings)
                 block = ""
         elif conf:
-            match = re.match(r"([^ ]*) ?= ?([^ \n#]*)", line)
-            if match != None:
+            if match := re.match(r"([^ ]*) ?= ?([^ \n#]*)", line):
                 config[match.group(1)] = match.group(2)
+            if gr := re.findall(r"(.+): ?(.+)", line):
+                gr = gr[0]
+                settings[gr[0]] = gr[1]
         else:
             block += line
     if block != "":
-        renderBlock(block)
+        renderBlock(block, settings)
 
 if __name__ == "__main__":
     args = sys.argv[1:]

@@ -1,5 +1,7 @@
 import sys
 from math import log10
+from threading import settrace
+
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
 from shapely.geometry import box
@@ -12,6 +14,9 @@ NUM = 0
 
 def getLog (x):
     return log10(x) if x > 0 else (-log10(abs(x)) if x != 0 else 0)
+
+def getLogB (x, a):
+    return log10(x) if x > a else 0
 
 def drawWorldMap (okved, input, num, settings):
 
@@ -49,7 +54,10 @@ def drawWorldMap (okved, input, num, settings):
     cursor.execute(com)
     values, lats, lons = [list(d) for d in zip(*cursor)]
 
-    values = [getLog(a) for a in values]
+    if "colorBorder" in settings:
+        values = [getLogB(a, int(settings["colorBorder"])) for a in values]
+    else:
+        values = [getLog(a) for a in values]
     maxD, minD = max(values), min(values)
     cValues = [round((v - minD) / (maxD - minD), 2) for v in values]
 
@@ -120,7 +128,11 @@ def drawRegionMap (okved, input, num, settings):
     cursor.execute(com)
     values, lats, lons = [list(d) for d in zip(*cursor)]
 
-    values = [getLog(a) for a in values]
+    if "colorBorder" in settings:
+        values = [getLogB(a, int(settings["colorBorder"])) for a in values]
+    else:
+        values = [getLog(a) for a in values]
+
     maxD, minD = max(values), min(values)
     cValues = [round((v - minD) / (maxD - minD), 2) for v in values]
 
@@ -157,7 +169,7 @@ def drawRegionMap (okved, input, num, settings):
     plt.close()
     db.close()
 
-def simplePrepair (text):
+def simplePrepair (text, setDefault):
     global NUM
 
     def replacer(match):
@@ -179,7 +191,7 @@ def simplePrepair (text):
         tex = re.sub(r"(.+):(.+)", replacer, tex)
     tex = tex.replace("PARMS", f"parms{m}")
 
-    settings = {}
+    settings = setDefault
     for line in tex.splitlines():
         if gr := re.findall(r"(.+): ?(.+)", line):
             gr = gr[0]
@@ -203,6 +215,7 @@ if __name__ == "__main__":
     cur = db.cursor()
 
     config = {}
+    settings = {}
     conf = False
     block = ""
     for line in file.readlines():
@@ -211,13 +224,15 @@ if __name__ == "__main__":
         elif "---" in line:
             conf = False
             if block != "":
-                simplePrepair(block)
+                simplePrepair(block, settings)
                 NUM += 1
         elif conf:
-            match = re.match(r"([^ ]*) ?= ?([^ \n#]*)", line)
-            if match != None:
+            if match := re.match(r"([^ ]*) ?= ?([^ \n#]*)", line):
                 config[match.group(1)] = match.group(2)
+            if gr := re.findall(r"(.+): ?(.+)", line):
+                gr = gr[0]
+                settings[gr[0]] = gr[1]
         else:
             block += line
     if block != "":
-        simplePrepair(block)
+        simplePrepair(block, settings)
