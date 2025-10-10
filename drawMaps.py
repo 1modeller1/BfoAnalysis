@@ -82,7 +82,7 @@ def drawWorldMap (okved, input, num, settings):
     ax.scatter(lons, lats, s=cValues, c=values, cmap="RdYlGn", alpha=0.6, transform=ccrs.PlateCarree())
 
     if "name" in settings:
-        plt.title(settings["name"])
+        plt.title(settings["name"], fontsize=15)
 
     if not "maps" in os.listdir():
         os.mkdir("maps")
@@ -161,7 +161,7 @@ def drawRegionMap (okved, input, num, settings):
     ax.scatter(lons, lats, s=cValues, c=values, cmap="RdYlGn", alpha=0.6, transform=ccrs.PlateCarree())
 
     if "name" in settings:
-        plt.title(settings["name"])
+        plt.title(settings["name"], fontsize=15)
 
     if not "maps" in os.listdir(): os.mkdir("maps")
     plt.tight_layout()
