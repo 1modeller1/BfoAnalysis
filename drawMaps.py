@@ -10,6 +10,9 @@ import sqlite3, os, re
 
 NUM = 0
 
+def getLog (x):
+    return log10(x) if x > 0 else (-log10(abs(x)) if x != 0 else 0)
+
 def drawWorldMap (okved, input, num, settings):
 
     db = sqlite3.connect(f"data/data-okved-{okved}.db")
@@ -46,7 +49,7 @@ def drawWorldMap (okved, input, num, settings):
     cursor.execute(com)
     values, lats, lons = [list(d) for d in zip(*cursor)]
 
-    values = [log10(a) if a > 0 else 0 for a in values]
+    values = [getLog(a) for a in values]
     maxD, minD = max(values), min(values)
     cValues = [round((v - minD) / (maxD - minD), 2) for v in values]
 
@@ -57,6 +60,7 @@ def drawWorldMap (okved, input, num, settings):
         cValues = [eval(settings["pointSize"].replace("x", str(c))) for c in cValues]
     else:
         cValues = [c * 2 + 1.5 for c in cValues]
+
 
     plt.figure(figsize=(12,8))
     ax = plt.axes(projection=ccrs.LambertConformal(central_longitude=105, central_latitude=60))
@@ -116,7 +120,7 @@ def drawRegionMap (okved, input, num, settings):
     cursor.execute(com)
     values, lats, lons = [list(d) for d in zip(*cursor)]
 
-    values = [log10(a) if a > 0 else 0 for a in values]
+    values = [getLog(a) for a in values]
     maxD, minD = max(values), min(values)
     cValues = [round((v - minD) / (maxD - minD), 2) for v in values]
 
