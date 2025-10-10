@@ -59,7 +59,7 @@ def addLocations (okved):
         x, y = info.latitude, info.longitude
         if isnan(x) or isnan(y):
             continue
-        x, y = round(x, 2), round(y, 2)
+        x, y = round(x, 3), round(y, 3)
 
         lats.append(x)
         lons.append(y)
